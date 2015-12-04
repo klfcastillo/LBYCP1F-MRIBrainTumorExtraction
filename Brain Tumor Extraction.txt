@@ -1,0 +1,24 @@
+% Read image from file
+tumor_image = imread('tumor.jpg');
+
+% Generating the high pass filter matrix
+hpf = -1 * ones(3)/9;
+hpf(2,2) = 8.5/9;
+
+% Filtering the image and adding the result to the original image to sharpen it
+filtered_tumor_image = imfilter(tumor_image, hpf);
+sharpened_tumor_image = tumor_image + filtered_tumor_image;
+
+%Converting the image to grayscale
+gray_tumor_image = rgb2gray(sharpened_tumor_image);
+
+%Median filter
+%median_tumor_image = medfilt2(gray_tumor_image);
+
+% Compute threshold segmentation.
+backgroundless_tumor_image = imtophat(median_tumor_image,strel('disk',15));
+contrast_tumor_image = imadjust(backgroundless_tumor_image);
+level = graythresh(contrast_tumor_image);
+bw = im2bw(contrast_tumor_image,level);
+bw = bwareaopen(bw, 50);
+imshow(bw)
